@@ -1,0 +1,18 @@
+spring:
+  jackson.locale: zh_CN
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/money_manager?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&autoReconnect=true&allowMultiQueries=true&failOverReadOnly=false&useSSL=false
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  http:
+      encoding:
+        force: true
+        charset: UTF-8
+        enabled: true
+server:
+  port: 7001
