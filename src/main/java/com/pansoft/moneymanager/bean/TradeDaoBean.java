@@ -12,22 +12,31 @@ public class TradeDaoBean {
     @Column(name = "t_oid")
     @GeneratedValue(generator = "alicomm-uuid")
     private String oid;
-    @Column(name = "m_uoid")
+    @Column(name = "t_uoid")
     private String parentOid;
-    @Column(name = "m_moid")
+    @Column(name = "t_moid")
     private String userOid;//成员用户对oid
-    @Column(name = "m_type", length = 1)
+    @Column(name = "t_type", length = 1)
     private int type;//0是支出 1是收入
-    @Column(name = "m_date")
+    @Column(name = "t_date")
     private String date;//时间
-    @Column(name = "m_consume_tag")
+    @Column(name = "t_consume_tag")
     private String consumeTag;//消费的Tag
-    @Column(name = "m_remarks")
+    @Column(name = "t_remarks")
     private String remarks;//备注信息
-    @Column(name = "m_money")
+    @Column(name = "t_money")
     private String money;//金额
-    @Column(name = "m_create_time")
+    @Column(name = "t_create_time")
     private String createTime;//创建时间
+    private String userName;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
     public String getOid() {
         return oid;
