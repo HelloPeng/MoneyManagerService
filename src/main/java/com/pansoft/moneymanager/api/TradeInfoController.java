@@ -5,9 +5,13 @@ import com.pansoft.moneymanager.base.BaseController;
 import com.pansoft.moneymanager.bean.QMemberUserDaoBean;
 import com.pansoft.moneymanager.bean.QTradeDaoBean;
 import com.pansoft.moneymanager.bean.TradeDaoBean;
+import com.pansoft.moneymanager.bean.TradeItemBean;
 import com.pansoft.moneymanager.dao.ITradeDao;
 import com.pansoft.moneymanager.utils.Dump;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -37,45 +41,26 @@ public class TradeInfoController extends BaseController {
     }
 
     @GetMapping("/api/trade/list")
-    public Dump tradeListInfo(@RequestParam("parentOid") String parentOid,
-                              @RequestParam("page") long page,
-                              @RequestParam("pageNum") int pageNum) {
+    public Dump tradeListInfoTest(@RequestParam("parentOid") String parentOid,
+                                  @RequestParam("page") long page,
+                                  @RequestParam("pageNum") int pageNum) {
         QTradeDaoBean qTradeDaoBean = QTradeDaoBean.tradeDaoBean;
         QMemberUserDaoBean qMemberUserDaoBean = QMemberUserDaoBean.memberUserDaoBean;
-        List<TradeDaoBean> tradeBeanList = new ArrayList<>();
-        try {
-            List<Tuple> data = mJPAQueryFactory
-                    .select(qTradeDaoBean.date
-                            , qTradeDaoBean.consumeTag
-                            , qTradeDaoBean.money
-                            , qTradeDaoBean.oid
-                            , qTradeDaoBean.remarks
-                            , qTradeDaoBean.type
-                            , qMemberUserDaoBean.userName)
-                    .from(qTradeDaoBean)
-                    .where(qTradeDaoBean.parentOid.eq(parentOid))
-                    .leftJoin(qMemberUserDaoBean)
-                    .on(qTradeDaoBean.userOid.eq(qMemberUserDaoBean.oid))
-                    .orderBy(qTradeDaoBean.date.desc())
-                    .offset(pageNum * (page - 1)).
-                            limit(pageNum).fetch();
-            if (data != null && !data.isEmpty()) {
-                for (Tuple tuple : data) {
-                    TradeDaoBean tradeBean = new TradeDaoBean();
-                    tradeBean.setUserName(tuple.get(qMemberUserDaoBean.userName));
-                    tradeBean.setConsumeTag(tuple.get(qTradeDaoBean.consumeTag));
-                    tradeBean.setDate(tuple.get(qTradeDaoBean.date));
-                    tradeBean.setMoney(tuple.get(qTradeDaoBean.money));
-                    tradeBean.setOid(tuple.get(qTradeDaoBean.oid));
-                    tradeBean.setRemarks(tuple.get(qTradeDaoBean.remarks));
-                    tradeBean.setType(tuple.get(qTradeDaoBean.type));
-                    tradeBeanList.add(tradeBean);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return Dump.success("获取成功", tradeBeanList);
+        Predicate predicate = qTradeDaoBean.userOid.eq(qMemberUserDaoBean.oid);
+        List<TradeItemBean> itemBeanList = mJPAQueryFactory
+                .select(Projections.fields(TradeItemBean.class, qTradeDaoBean.date
+                        , qTradeDaoBean.consumeTag
+                        , qTradeDaoBean.money
+                        , qTradeDaoBean.oid
+                        , qTradeDaoBean.remarks
+                        , qTradeDaoBean.type
+                        , qMemberUserDaoBean.userName))
+                .from(qTradeDaoBean, qMemberUserDaoBean)
+                .where(qTradeDaoBean.parentOid.eq(parentOid).and(predicate))
+                .orderBy(qTradeDaoBean.date.desc())
+                .offset(pageNum * (page - 1)).
+                        limit(pageNum).fetch();
+        return Dump.success("获取成功", itemBeanList);
     }
 
     @PostMapping("/api/trade/del")
